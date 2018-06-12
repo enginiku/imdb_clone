@@ -80,11 +80,11 @@ WSGI_APPLICATION = 'imdb_clone.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'imdb',
-        'USER': 'navin',
-        'PASSWORD': 'mysql123',
-        'HOST': '',
-        'PORT': ''
+        'NAME': 'deh8vingcu91l3j1',
+        'USER': 'o03cm2sjkhjfada1',
+        'PASSWORD': 'omis3gwimtbbyl7r',
+        'HOST': 'qzkp8ry756433yd4.cbetxkdyhwsb.us-east-1.rds.amazonaws.com',
+        'PORT': 3306
     }
 }
 
