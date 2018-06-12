@@ -61,3 +61,13 @@ This API allows admins to delete a movie record having given id.
 GET movies/search?q=<search_string>
 ```
 This API returns a list of movies based on the given search term. The parameter 'q' is required.
+
+
+### Future scalability
+To cater to 15M users accessing 5M movies on the platform, the current architecture will create a bottleneck in terms of database performance as well as memory.
+
+It would be ideal to have a NoSQL database like ElasticSearch and use it's indexing capabilities to speed up the look up time.
+
+The other change would be to increase the number of dynos if using Heroku or altogether migrate to AWS to have a tighter control over the infrastructure like choosing high performance EC2 instances.
+
+Besides we can also add pagination to the APIs
