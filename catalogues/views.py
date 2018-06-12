@@ -48,7 +48,10 @@ def update(request, id):
 		else:
 			valid = sanitize_data(request)
 			m = Movie.objects.filter(id=id).update(name=body_json['name'], director=body_json['director'], imdb_score=body_json['imdb_score'], popularity=body_json['popularity'], genres=body_json['genres'])		
-			return JsonResponse({'data': body_json}, safe=False)
+			if not m:
+				return HttpResponse('No such movie exists')
+			else:
+				return JsonResponse({'data': body_json}, safe=False)	
 	except Movie.DoesNotExist:
 		return HttpResponse('Dude no such movie man!')
 
