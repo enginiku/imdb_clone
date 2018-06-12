@@ -7,20 +7,24 @@ import json
 
 # Lists all the movies present
 def index(request):
-	movies = list(Movie.objects.values())
-	return JsonResponse({'data':movies}, status = 200, safe = False)
+	if request.method == 'GET':
+		movies = list(Movie.objects.values())
+		return JsonResponse({'data':movies}, status = 200, safe = False)
+	else:
+		return JsonResponse({'message': 'Method not allowed'}, status = 405, safe = False)	
 
 # Adds a new movie only via an admin
 def create(request):
-	body_json = json.loads(request.body)
-	print(body_json)
-	valid = validate_request(body_json)
-	if not valid:
-		return JsonResponse({'message': 'Incomplete/incorrect request'}, status = 400, safe = False)
+	if request.method == 'POST':
+		body_json = json.loads(request.body)
+		valid = validate_request(body_json)
+		if not valid:
+			return JsonResponse({'message': 'Incomplete/incorrect request'}, status = 400, safe = False)
+		else:
+			Movie.objects.create(name=body_json['name'], director=body_json['director'], imdb_score=body_json['imdb_score'], popularity=body_json['popularity'], genres=body_json['genres'])
+			return JsonResponse({'data': 'Record successfully created'}, status = 200, safe = False)
 	else:
-		valid = sanitize_data(request)
-		Movie.objects.create(name=body_json['name'], director=body_json['director'], imdb_score=body_json['imdb_score'], popularity=body_json['popularity'], genres=body_json['genres'])
-		return JsonResponse({'data': 'Record successfully created'}, status = 200, safe = False)
+		return JsonResponse({'message': 'Method not allowed'}, status = 405, safe = False)		
 
 # Checks for all required fields to create a movie record
 def validate_request(body_json):
@@ -37,8 +41,6 @@ def validate_request(body_json):
 	elif not body_json['name'].strip() or not body_json['director'].strip() or not body_json['genres'].strip():
 		valid = False
 
-	# Check if not floating numbers	
-
 	return valid
 
 def sanitize_data(request):
@@ -48,40 +50,51 @@ def sanitize_data(request):
 
 # Returns a specific movie record
 def edit(request, id):
-	try:
-		m = Movie.objects.get(id=id)
-		return JsonResponse({'data': model_to_dict(m)}, status = 200, safe = False)
-	except Movie.DoesNotExist:
-		return JsonResponse({'message': 'No such movie exists'}, status = 400, safe = False)
+	if request.method == 'GET':
+		try:
+			m = Movie.objects.get(id=id)
+			return JsonResponse({'data': model_to_dict(m)}, status = 200, safe = False)
+		except Movie.DoesNotExist:
+			return JsonResponse({'message': 'No such movie exists'}, status = 400, safe = False)
+	else:
+		return JsonResponse({'message': 'Method not allowed'}, status = 405, safe = False)			
 
 # Updates a particular movie record
 def update(request, id):
-	body_json = json.loads(request.body)
-	valid = validate_request(body_json)
-	if not valid:
-		return JsonResponse({'message': 'Incomplete request'}, status = 400, safe = False)
-	else:
-		valid = sanitize_data(request)
-		m = Movie.objects.filter(id=id).update(name=body_json['name'], director=body_json['director'], imdb_score=body_json['imdb_score'], popularity=body_json['popularity'], genres=body_json['genres'])		
-		if not m:
-			return JsonResponse({'message': 'No such movie exists'}, status = 400, safe = False)
+	if request.method == 'PUT':
+		body_json = json.loads(request.body)
+		valid = validate_request(body_json)
+		if not valid:
+			return JsonResponse({'message': 'Incomplete request'}, status = 400, safe = False)
 		else:
-			return JsonResponse({'data': body_json}, status = 200, safe = False)
+			m = Movie.objects.filter(id=id).update(name=body_json['name'], director=body_json['director'], imdb_score=body_json['imdb_score'], popularity=body_json['popularity'], genres=body_json['genres'])		
+			if not m:
+				return JsonResponse({'message': 'No such movie exists'}, status = 400, safe = False)
+			else:
+				return JsonResponse({'data': body_json}, status = 200, safe = False)
+	else:
+		return JsonResponse({'message': 'Method not allowed'}, status = 405, safe = False)		
 
 # Removes a particular movie record
 def delete(request, id):
-	try:
-		Movie.objects.filter(id=id).delete()
-		return JsonResponse({'message': 'Movie deleted successfully'}, status = 200, safe = False)
-	except Movie.DoesNotExist:
-		return JsonResponse({'message': 'No such movie exists'}, status = 400, safe = False)
+	if request.method == 'DELETE':
+		try:
+			Movie.objects.filter(id=id).delete()
+			return JsonResponse({'message': 'Movie deleted successfully'}, status = 200, safe = False)
+		except Movie.DoesNotExist:
+			return JsonResponse({'message': 'No such movie exists'}, status = 400, safe = False)
+	else:
+		return JsonResponse({'message': 'Method not allowed'}, status = 405, safe = False)	
 
 # Searches for a movie based on 'q' query parameter
 def search(request):
-	if 'q' not in request.GET:
-		return JsonResponse({'message': 'No search query present'}, status = 400, safe = False)
+	if request.method == 'GET':
+		if 'q' not in request.GET:
+			return JsonResponse({'message': 'No search query present'}, status = 400, safe = False)
+		else:
+			search = request.GET['q']
+			results = list(Movie.objects.filter(Q(name__icontains=search) | Q(director__icontains=search) | Q(genres__icontains=search)).values())
+			return JsonResponse({'data': results}, status = 200, safe = False)
 	else:
-		search = request.GET['q']
-		results = list(Movie.objects.filter(Q(name__icontains=search) | Q(director__icontains=search) | Q(genres__icontains=search)).values())
-		return JsonResponse({'data': results}, status = 200, safe = False)	
+		return JsonResponse({'message': 'Method not allowed'}, status = 405, safe = False)			
 					
