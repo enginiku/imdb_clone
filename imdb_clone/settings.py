@@ -25,7 +25,7 @@ SECRET_KEY = '!l$9+0x6-c=6_qc2u3%!#u+0sx^re9)2zf94(y3s(97sm%r*j4'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = [*]
+ALLOWED_HOSTS = ['0.0.0.0', 'localhost', 'imdb-api-clone.herokuapp.com']
 
 
 # Application definition
