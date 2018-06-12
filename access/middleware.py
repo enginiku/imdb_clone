@@ -1,5 +1,5 @@
 from .models import User
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 
 class CheckUser:
 
@@ -13,7 +13,7 @@ class CheckUser:
 		if key in self.request.META:
 			return self.validate_user(key)
 		else:
-			return HttpResponse('Header api-key is missing')
+			return JsonResponse({'message': 'Header api-key is missing'}, status = 401, safe = False)
 
 
 	#Validates user via api key		
@@ -21,7 +21,7 @@ class CheckUser:
 		try:
 			u = User.objects.get(api_key=self.request.META[key])
 		except User.DoesNotExist:
-			return HttpResponse('Invalid value for api-key')
+			return JsonResponse({'message': 'Invalid value for api-key'}, status = 401, safe = False)
 		else:
 			return self.validate_access(u)
 
@@ -31,6 +31,6 @@ class CheckUser:
 			return self.get_response(self.request)
 		else:
 			if not u.is_admin:
-				return HttpResponse('You do not have access to perform this action')
+				return JsonResponse({'message': 'You do not have access to perform this action'}, status = 403, safe = False)
 			else:
 				return self.get_response(self.request)
